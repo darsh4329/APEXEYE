@@ -1,0 +1,4 @@
+# APEXEYE Master — Dependencies
+python-dotenv>=1.0.0
+flask>=3.0.0
+boto3>=1.34.0

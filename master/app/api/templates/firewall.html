@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="APEXEYE Firewall — Master-Controlled Website Blocking">
+    <title>APEXEYE — Firewall Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0b0e14;
+            --surface: #131820;
+            --surface-hover: #1a2130;
+            --surface-card: #151c27;
+            --border: #1e2a3a;
+            --border-highlight: #2d3f56;
+            --text: #e0e6ed;
+            --text-dim: #7a8ba0;
+            --text-muted: #536377;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59,130,246,.18);
+            --green: #22c55e;
+            --green-bg: rgba(34,197,94,.12);
+            --green-glow: rgba(34,197,94,.2);
+            --red: #ef4444;
+            --red-bg: rgba(239,68,68,.12);
+            --amber: #f59e0b;
+            --amber-bg: rgba(245,158,11,.12);
+            --blue: #3b82f6;
+            --blue-bg: rgba(59,130,246,.12);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
+
+        /* Header */
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 32px;
+            background: linear-gradient(180deg, rgba(59,130,246,.08) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 50;
+            backdrop-filter: blur(12px);
+        }
+        .header-brand { display: flex; align-items: center; gap: 14px; }
+        .header-logo {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 20px; color: #fff;
+            box-shadow: 0 0 24px rgba(59,130,246,.35);
+        }
+        .header-title { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+        .header-title span { color: var(--accent); }
+        .header-sub { font-size: 12px; color: var(--text-dim); }
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: var(--radius-sm);
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text-dim); font-size: 13px; font-weight: 500;
+            text-decoration: none; transition: all .2s;
+        }
+        .back-btn:hover { color: var(--text); border-color: var(--border-highlight); }
+
+        /* Main */
+        .main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+
+        /* Status Hero Card */
+        .status-hero {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px 36px; margin-bottom: 28px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 24px; flex-wrap: wrap;
+            transition: border-color .3s, box-shadow .3s;
+        }
+        .status-hero.is-active {
+            border-color: rgba(34,197,94,.4);
+            box-shadow: 0 0 40px rgba(34,197,94,.12);
+            background: linear-gradient(135deg, rgba(34,197,94,.05), var(--surface));
+        }
+        .status-hero-left { display: flex; flex-direction: column; gap: 6px; }
+        .status-hero-label { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); }
+        .status-hero-value { font-size: 38px; font-weight: 700; letter-spacing: -.02em; display: flex; align-items: center; gap: 12px; }
+        .status-hero-meta { font-size: 12px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+        .toggle-btn {
+            padding: 14px 32px; border: none; border-radius: var(--radius-sm);
+            font-family: inherit; font-size: 14px; font-weight: 700;
+            letter-spacing: .04em; cursor: pointer; transition: all .2s;
+            text-transform: uppercase; white-space: nowrap;
+        }
+        .toggle-btn.activate {
+            background: var(--green-bg); color: var(--green);
+            border: 1px solid rgba(34,197,94,.4);
+        }
+        .toggle-btn.activate:hover {
+            background: rgba(34,197,94,.22);
+            box-shadow: 0 0 24px rgba(34,197,94,.25);
+        }
+        .toggle-btn.deactivate {
+            background: var(--red-bg); color: var(--red);
+            border: 1px solid rgba(239,68,68,.4);
+        }
+        .toggle-btn.deactivate:hover {
+            background: rgba(239,68,68,.22);
+            box-shadow: 0 0 24px rgba(239,68,68,.2);
+        }
+
+        /* Section */
+        .section { margin-bottom: 32px; }
+        .section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px; padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap; gap: 12px;
+        }
+        .section-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .section-subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+        /* Blocked domains table */
+        .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); background: var(--bg); border-bottom: 1px solid var(--border); }
+        td { padding: 13px 16px; font-size: 13px; border-bottom: 1px solid var(--border); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--surface-hover); }
+
+        /* Add domain form */
+        .add-domain-form {
+            display: flex; gap: 10px; align-items: stretch;
+        }
+        .add-domain-form input {
+            flex: 1; padding: 10px 14px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text);
+            font-family: inherit; font-size: 13px; outline: none;
+            transition: border-color .2s;
+        }
+        .add-domain-form input:focus { border-color: var(--accent); }
+        .btn { padding: 9px 20px; border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: #2563eb; box-shadow: 0 0 16px var(--accent-glow); }
+        .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,.25); font-size: 12px; padding: 5px 12px; }
+        .btn-danger:hover { background: rgba(239,68,68,.22); }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+        /* Badges */
+        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+        .badge-blocked { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,.2); }
+        .badge-synced { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(59,130,246,.2); }
+        .badge-error { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,158,11,.2); }
+
+        /* Log entries */
+        .log-entry {
+            display: flex; gap: 14px; align-items: flex-start;
+            padding: 14px 20px; border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+        .log-entry:last-child { border-bottom: none; }
+        .log-entry:hover { background: var(--surface-hover); }
+        .log-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+        .log-body { flex: 1; }
+        .log-device { font-weight: 600; font-size: 13px; }
+        .log-detail { font-size: 12px; color: var(--text-dim); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+        .log-time { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        /* Filters */
+        .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+        .filter-bar input, .filter-bar select {
+            padding: 7px 12px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text); font-family: inherit;
+            font-size: 12px; outline: none; transition: border-color .2s;
+        }
+        .filter-bar input:focus, .filter-bar select:focus { border-color: var(--accent); }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 48px 24px; color: var(--text-dim); }
+        .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+        .empty-state p { font-size: 13px; }
+
+        /* Policy version badge */
+        .version-pill {
+            font-size: 11px; padding: 3px 9px; background: var(--blue-bg);
+            color: var(--blue); border: 1px solid rgba(59,130,246,.2);
+            border-radius: 10px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Toast */
+        #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 12px 18px;
+            font-size: 13px; color: var(--text); min-width: 240px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.4);
+            animation: slideUp .25s ease; display: flex; align-items: center; gap: 10px;
+        }
+        .toast.success { border-color: rgba(34,197,94,.4); }
+        .toast.error { border-color: rgba(239,68,68,.4); }
+        @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .header { padding: 14px 18px; }
+            .main { padding: 18px; }
+            .status-hero { padding: 22px 20px; }
+            .status-hero-value { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="header-brand">
+        <div class="header-logo">A</div>
+        <div>
+            <div class="header-title">APEX<span>EYE</span></div>
+            <div class="header-sub">Firewall Management</div>
+        </div>
+    </div>
+    <a href="/" class="back-btn">← Back to Dashboard</a>
+</header>
+
+<div class="main">
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- Section 1: Firewall Status + Toggle               -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="section-header" style="border:none; padding:0; margin-bottom:18px;">
+        <div>
+            <div class="section-title" style="font-size:22px;">🔥 APEXEYE Firewall</div>
+            <div class="section-subtitle">Master-controlled website blocking across all authenticated clients</div>
+        </div>
+        <span class="version-pill" id="policy-version-badge">v{{ policy_version }}</span>
+    </div>
+
+    <div class="status-hero {% if firewall_enabled %}is-active{% endif %}" id="status-hero-card">
+        <div class="status-hero-left">
+            <div class="status-hero-label">Firewall Status</div>
+            <div class="status-hero-value" id="firewall-status-value">
+                {% if firewall_enabled %}
+                    <span style="color:var(--green);">🟢 ACTIVE</span>
+                {% else %}
+                    <span style="color:var(--text-dim);">⚪ INACTIVE</span>
+                {% endif %}
+            </div>
+            <div class="status-hero-meta" id="firewall-status-meta">
+                Policy v{{ policy_version }} &nbsp;·&nbsp;
+                {{ domain_count }} blocked site(s) &nbsp;·&nbsp;
+                {{ blocked_today }} blocked attempt(s) today &nbsp;·&nbsp;
+                Last updated by <strong>{{ updated_by }}</strong>
+                {% if updated_at %} at {{ updated_at }}{% endif %}
+            </div>
+        </div>
+        {% if firewall_enabled %}
+        <button class="toggle-btn deactivate" id="toggle-btn" onclick="toggleFirewall(false)">
+            ⏹ TAP TO DEACTIVATE
+        </button>
+        {% else %}
+        <button class="toggle-btn activate" id="toggle-btn" onclick="toggleFirewall(true)">
+            ▶ TAP TO ACTIVATE
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- Section 2: Blocked Websites                       -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title">🚫 Blocked Websites</div>
+                <div class="section-subtitle">Add domains to block. Enforcement persists even when firewall is temporarily deactivated.</div>
+            </div>
+        </div>
+
+        <!-- Add domain form -->
+        <div class="add-domain-form" style="margin-bottom:18px;">
+            <input type="text" id="add-domain-input" placeholder="e.g. facebook.com or https://www.youtube.com/…"
+                   onkeydown="if(event.key==='Enter') addDomain()">
+            <button class="btn btn-primary" onclick="addDomain()" id="add-domain-btn">+ ADD WEBSITE</button>
+        </div>
+
+        <div class="table-wrap" id="blocked-domains-table">
+            {% if domains %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Domain (Normalized)</th>
+                        <th>Original Input</th>
+                        <th>Added By</th>
+                        <th>Added At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="blocked-domains-tbody">
+                    {% for d in domains %}
+                    <tr id="domain-row-{{ d.id }}">
+                        <td style="color:var(--text-muted); font-family:'JetBrains Mono',monospace; font-size:11px;">{{ loop.index }}</td>
+                        <td style="font-weight:600; font-family:'JetBrains Mono',monospace; color:var(--red);">{{ d.normalized_domain }}</td>
+                        <td style="font-size:12px; color:var(--text-dim);">{{ d.domain }}</td>
+                        <td style="font-size:12px;">{{ d.created_by }}</td>
+                        <td style="font-size:12px; color:var(--text-dim);">{{ d.created_at }}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="removeDomain({{ d.id }}, '{{ d.normalized_domain }}')">REMOVE</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state" id="domains-empty-state">
+                <div class="icon">🔓</div>
+                <p>No websites blocked yet. Add a domain above to start blocking.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- Section 3: Firewall Activity Log                  -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title">📋 Firewall Activity</div>
+                <div class="section-subtitle">Real blocked connection attempts from clients and Master</div>
+            </div>
+            <button class="btn btn-sm" style="background:var(--surface-hover); border:1px solid var(--border); color:var(--text-dim);" onclick="refreshLogs()">↻ Refresh</button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar">
+            <input type="text" id="filter-client" placeholder="Filter by device…" oninput="applyLogFilters()">
+            <input type="text" id="filter-domain" placeholder="Filter by domain…" oninput="applyLogFilters()">
+            <select id="filter-action" onchange="applyLogFilters()">
+                <option value="">All Actions</option>
+                <option value="BLOCKED">BLOCKED</option>
+            </select>
+            <input type="date" id="filter-since" onchange="applyLogFilters()" title="Since date">
+        </div>
+
+        <div class="table-wrap">
+            <div id="log-entries-container">
+                {% if logs %}
+                    {% for log in logs %}
+                    <div class="log-entry" data-device="{{ log.device_id }}" data-domain="{{ log.domain }}" data-action="{{ log.action }}">
+                        <div class="log-icon">🔴</div>
+                        <div class="log-body">
+                            <div class="log-device">{{ log.device_name or log.device_id }}</div>
+                            <div class="log-detail">
+                                Tried to reach: <strong>{{ log.domain }}</strong>
+                                {% if log.url and log.url != log.domain %} &nbsp;({{ log.url }}){% endif %}
+                            </div>
+                            <div class="log-detail" style="margin-top:2px; color:var(--text-muted);">
+                                Platform: {{ log.platform or '—' }} &nbsp;·&nbsp;
+                                Policy v{{ log.policy_version }}
+                                {% if log.destination_ip %} &nbsp;·&nbsp; Dest: {{ log.destination_ip }}{% endif %}
+                            </div>
+                            <div class="log-time" title="UTC: {{ log.timestamp_utc or log.timestamp }}">{{ log.timestamp }}</div>
+                        </div>
+                        <span class="badge badge-blocked">{{ log.action }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state" id="logs-empty-state">
+                    <div class="icon">✅</div>
+                    <p>No blocked connection attempts recorded yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let firewallEnabled = {{ 'true' if firewall_enabled else 'false' }};
+let policyVersion = {{ policy_version }};
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+    t.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 4000);
+}
+
+// ── Firewall Toggle ─────────────────────────────────────────────────────────
+async function toggleFirewall(enable) {
+    const btn = document.getElementById('toggle-btn');
+    btn.disabled = true;
+    btn.textContent = 'Processing…';
+    try {
+        const endpoint = enable ? '/api/firewall/enable' : '/api/firewall/disable';
+        const r = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actor: 'admin' })
+        });
+        const d = await r.json();
+        if (d.success !== false) {
+            firewallEnabled = enable;
+            policyVersion = d.policy_version;
+            updateStatusUI();
+            toast(enable ? 'Firewall ACTIVATED. Policy distributed to clients.' : 'Firewall DEACTIVATED. Blocked list preserved.', 'success');
+            if (d.master_enforcement_error) {
+                toast('Master enforcement warning: ' + d.master_enforcement_error, 'warning');
+            }
+        } else {
+            toast('Error: ' + (d.error || 'Failed to toggle firewall.'), 'error');
+            resetToggleBtn();
+        }
+    } catch (err) {
+        toast('Request failed: ' + err.message, 'error');
+        resetToggleBtn();
+    }
+}
+
+function resetToggleBtn() {
+    const btn = document.getElementById('toggle-btn');
+    btn.disabled = false;
+    updateToggleBtn();
+}
+
+function updateToggleBtn() {
+    const btn = document.getElementById('toggle-btn');
+    if (firewallEnabled) {
+        btn.className = 'toggle-btn deactivate';
+        btn.textContent = '⏹ TAP TO DEACTIVATE';
+        btn.onclick = () => toggleFirewall(false);
+    } else {
+        btn.className = 'toggle-btn activate';
+        btn.textContent = '▶ TAP TO ACTIVATE';
+        btn.onclick = () => toggleFirewall(true);
+    }
+    btn.disabled = false;
+}
+
+function updateStatusUI() {
+    const hero = document.getElementById('status-hero-card');
+    const val = document.getElementById('firewall-status-value');
+    if (firewallEnabled) {
+        val.innerHTML = '<span style="color:var(--green);">🟢 ACTIVE</span>';
+        hero.classList.add('is-active');
+    } else {
+        val.innerHTML = '<span style="color:var(--text-dim);">⚪ INACTIVE</span>';
+        hero.classList.remove('is-active');
+    }
+    document.getElementById('policy-version-badge').textContent = 'v' + policyVersion;
+    updateToggleBtn();
+}
+
+// ── Add Domain ──────────────────────────────────────────────────────────────
+async function addDomain() {
+    const input = document.getElementById('add-domain-input');
+    const rawDomain = input.value.trim();
+    if (!rawDomain) { toast('Please enter a domain.', 'warning'); return; }
+
+    const btn = document.getElementById('add-domain-btn');
+    btn.disabled = true; btn.textContent = 'Adding…';
+
+    try {
+        const r = await fetch('/api/firewall/domains', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain: rawDomain, actor: 'admin' })
+        });
+        const d = await r.json();
+        if (r.ok && d.success) {
+            input.value = '';
+            policyVersion = d.domain.policy_version;
+            document.getElementById('policy-version-badge').textContent = 'v' + policyVersion;
+            appendDomainRow(d.domain);
+            toast(`'${d.domain.normalized_domain}' added to blocked list.`, 'success');
+        } else {
+            toast('Error: ' + (d.error || 'Could not add domain.'), 'error');
+        }
+    } catch (err) {
+        toast('Request failed: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = '+ ADD WEBSITE';
+    }
+}
+
+function appendDomainRow(d) {
+    // Remove empty-state if present
+    const empty = document.getElementById('domains-empty-state');
+    if (empty) empty.remove();
+
+    let tbody = document.getElementById('blocked-domains-tbody');
+    if (!tbody) {
+        // Need to build the table
+        const wrap = document.getElementById('blocked-domains-table');
+        wrap.innerHTML = `<table><thead><tr>
+            <th>#</th><th>Domain (Normalized)</th><th>Original Input</th><th>Added By</th><th>Added At</th><th>Action</th>
+        </tr></thead><tbody id="blocked-domains-tbody"></tbody></table>`;
+        tbody = document.getElementById('blocked-domains-tbody');
+    }
+    const count = tbody.children.length + 1;
+    const tr = document.createElement('tr');
+    tr.id = `domain-row-${d.id}`;
+    tr.innerHTML = `
+        <td style="color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:11px;">${count}</td>
+        <td style="font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--red);">${escapeHtml(d.normalized_domain)}</td>
+        <td style="font-size:12px;color:var(--text-dim);">${escapeHtml(d.domain)}</td>
+        <td style="font-size:12px;">${escapeHtml(d.created_by)}</td>
+        <td style="font-size:12px;color:var(--text-dim);">${escapeHtml(d.created_at)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="removeDomain(${d.id}, '${escapeHtml(d.normalized_domain)}')">REMOVE</button></td>
+    `;
+    tbody.prepend(tr);
+}
+
+// ── Remove Domain ───────────────────────────────────────────────────────────
+async function removeDomain(id, domain) {
+    if (!confirm(`Remove '${domain}' from the blocked list?`)) return;
+    try {
+        const r = await fetch(`/api/firewall/domains/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actor: 'admin' })
+        });
+        const d = await r.json();
+        if (r.ok && d.success) {
+            const row = document.getElementById(`domain-row-${id}`);
+            if (row) row.remove();
+            policyVersion = d.result.policy_version;
+            document.getElementById('policy-version-badge').textContent = 'v' + policyVersion;
+            // Check if table body empty
+            const tbody = document.getElementById('blocked-domains-tbody');
+            if (tbody && tbody.children.length === 0) {
+                document.getElementById('blocked-domains-table').innerHTML =
+                    `<div class="empty-state" id="domains-empty-state"><div class="icon">🔓</div><p>No websites blocked. Add a domain above.</p></div>`;
+            }
+            toast(`'${domain}' removed from blocked list.`, 'success');
+        } else {
+            toast('Error: ' + (d.error || 'Could not remove domain.'), 'error');
+        }
+    } catch (err) {
+        toast('Request failed: ' + err.message, 'error');
+    }
+}
+
+// ── Log Filters ─────────────────────────────────────────────────────────────
+function applyLogFilters() {
+    const clientF = document.getElementById('filter-client').value.toLowerCase();
+    const domainF = document.getElementById('filter-domain').value.toLowerCase();
+    const actionF = document.getElementById('filter-action').value.toUpperCase();
+    const sinceF  = document.getElementById('filter-since').value;
+
+    document.querySelectorAll('#log-entries-container .log-entry').forEach(entry => {
+        const device = (entry.dataset.device || '').toLowerCase();
+        const domain = (entry.dataset.domain || '').toLowerCase();
+        const action = (entry.dataset.action || '').toUpperCase();
+        let show = true;
+        if (clientF && !device.includes(clientF)) show = false;
+        if (domainF && !domain.includes(domainF)) show = false;
+        if (actionF && action !== actionF) show = false;
+        entry.style.display = show ? '' : 'none';
+    });
+}
+
+async function refreshLogs() {
+    try {
+        const params = new URLSearchParams();
+        const clientF = document.getElementById('filter-client').value;
+        const domainF = document.getElementById('filter-domain').value;
+        const actionF = document.getElementById('filter-action').value;
+        const sinceF  = document.getElementById('filter-since').value;
+        if (clientF) params.set('device_id', clientF);
+        if (domainF) params.set('domain', domainF);
+        if (actionF) params.set('action', actionF);
+        if (sinceF)  params.set('since', sinceF);
+        params.set('limit', '100');
+
+        const r = await fetch('/api/firewall/logs?' + params.toString());
+        const d = await r.json();
+        renderLogs(d.logs || []);
+    } catch (err) {
+        toast('Could not refresh logs: ' + err.message, 'error');
+    }
+}
+
+function renderLogs(logs) {
+    const container = document.getElementById('log-entries-container');
+    if (!logs.length) {
+        container.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>No blocked connection attempts found.</p></div>`;
+        return;
+    }
+    container.innerHTML = logs.map(log => `
+        <div class="log-entry" data-device="${escapeHtml(log.device_id||'')}" data-domain="${escapeHtml(log.domain)}" data-action="${escapeHtml(log.action)}">
+            <div class="log-icon">🔴</div>
+            <div class="log-body">
+                <div class="log-device">${escapeHtml(log.device_name || log.device_id || '—')}</div>
+                <div class="log-detail">Tried to reach: <strong>${escapeHtml(log.domain)}</strong>${log.url && log.url !== log.domain ? ` &nbsp;(${escapeHtml(log.url)})` : ''}</div>
+                <div class="log-detail" style="margin-top:2px;color:var(--text-muted);">Platform: ${escapeHtml(log.platform||'—')} &nbsp;·&nbsp; Policy v${log.policy_version}${log.destination_ip ? ` &nbsp;·&nbsp; Dest: ${escapeHtml(log.destination_ip)}` : ''}</div>
+                <div class="log-time" title="UTC: ${escapeHtml(log.timestamp_utc || log.timestamp)}">${escapeHtml(log.timestamp)}</div>
+            </div>
+            <span class="badge badge-blocked">${escapeHtml(log.action)}</span>
+        </div>
+    `).join('');
+}
+
+function escapeHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Auto-refresh logs every 60s
+setInterval(refreshLogs, 60000);
+</script>
+</body>
+</html>
