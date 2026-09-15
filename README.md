@@ -48,15 +48,13 @@ Designed with zero-trust networking principles, client agents communicate strict
 ## System Previews
 
 ### 1. Master Command Center & Fleet Dashboard
-<!-- Placeholder: Basic screenshot of Master Dashboard -->
-```
-+-----------------------------------------------------------------------------------+
-|                                                                                   |
-|                   [ SCREENSHOT PLACEHOLDER: MASTER DASHBOARD ]                    |
-|             (Fleet Overview, Device Health, CPU/RAM/Disk Graphs, CCTV Status)     |
-|                                                                                   |
-+-----------------------------------------------------------------------------------+
-```
+
+<img width="1911" height="941" alt="Screenshot 2026-09-15 212528" src="https://github.com/user-attachments/assets/66580ed6-32ae-452e-bac9-d2669660f2a9" />
+
+<img width="1874" height="873" alt="Screenshot 2026-09-15 212608" src="https://github.com/user-attachments/assets/34e10d65-3c59-47ef-8bc2-dc161702158e" />
+
+---
+
 *Master web dashboard visualizing real-time fleet telemetry, connected endpoints, live status gauges, and anomaly alerts.*
 
 ---
@@ -76,28 +74,21 @@ Designed with zero-trust networking principles, client agents communicate strict
 ---
 
 ### 3. Network Firewall & Policy Manager
-<!-- Placeholder: Screenshot of Firewall -->
-```
-+-----------------------------------------------------------------------------------+
-|                                                                                   |
-|                    [ SCREENSHOT PLACEHOLDER: FIREWALL POLICY ]                    |
-|              (Domain Blocking, Active Rules, Block Page Redirections, Audit)      |
-|                                                                                   |
-+-----------------------------------------------------------------------------------+
+
+<img width="1880" height="873" alt="Screenshot 2026-09-15 212635" src="https://github.com/user-attachments/assets/443f0f8f-e9bd-477b-91cf-f1befa595659" />
+
+<img width="1852" height="877" alt="Screenshot 2026-09-15 212650" src="https://github.com/user-attachments/assets/fb0477a0-7341-47bf-b179-b99dc82e8ecc" />
+
+
 ```
 *Firewall policy editor and security enforcement panel controlling domain blacklists, IP rules, and custom block pages.*
 
 ---
 
 ### 4. Centralized System & Audit Logs
-<!-- Placeholder: Screenshot of Logs -->
-```
-+-----------------------------------------------------------------------------------+
-|                                                                                   |
-|                      [ SCREENSHOT PLACEHOLDER: LOG VIEWER ]                       |
-|           (Event Ingestion, Windows Event Logs, Syslog, Severity Filters, Search) |
-|                                                                                   |
-+-----------------------------------------------------------------------------------+
+
+<img width="1852" height="877" alt="Screenshot 2026-09-15 212650" src="https://github.com/user-attachments/assets/39e45901-f99a-4d57-9170-a6141c20da71" />
+
 ```
 *Centralized event log viewer with real-time log ingestion, severity filtering (INFO, WARN, ERROR, CRITICAL), and tamper-evident audit logs.*
 
