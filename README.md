@@ -60,14 +60,10 @@ Designed with zero-trust networking principles, client agents communicate strict
 ---
 
 ### 2. Client Agent Dashboard
-<!-- Placeholder: Basic screenshot of Client Dashboard -->
-```
-+-----------------------------------------------------------------------------------+
-|                                                                                   |
-|                   [ SCREENSHOT PLACEHOLDER: CLIENT DASHBOARD ]                    |
-|             (Local Enrollment, Active Heartbeat, Agent Metrics, Master Link)      |
-|                                                                                   |
-+-----------------------------------------------------------------------------------+
+<img width="1920" height="1080" alt="Screenshot (620)" src="https://github.com/user-attachments/assets/f27f0f86-4f75-43e4-ab2a-f7a80cf06f62" />
+
+<img width="1920" height="1080" alt="Screenshot (621)" src="https://github.com/user-attachments/assets/dbe6ac70-041d-40e2-9ecd-a1aec9867400" />
+
 ```
 *Client agent local web interface running on port 9200 for token pairing, host resource metrics, and sync state.*
 
