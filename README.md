@@ -64,31 +64,21 @@ Designed with zero-trust networking principles, client agents communicate strict
 
 <img width="1920" height="1080" alt="Screenshot (621)" src="https://github.com/user-attachments/assets/dbe6ac70-041d-40e2-9ecd-a1aec9867400" />
 
-```
-*Client agent local web interface running on port 9200 for token pairing, host resource metrics, and sync state.*
-
----
 
 ### 3. Network Firewall & Policy Manager
 
-<img width="1880" height="873" alt="Screenshot 2026-09-15 212635" src="https://github.com/user-attachments/assets/443f0f8f-e9bd-477b-91cf-f1befa595659" />
+<img width="1880" height="873" alt="Screenshot 2026-09-15 212635" src="https://github.com/user-attachments/assets/e1e5f0e6-354d-4003-a5ac-ff9c515df5bb" />
+<img width="1852" height="877" alt="Screenshot 2026-09-15 212650" src="https://github.com/user-attachments/assets/b0cc20d0-7dd5-4bc2-be77-effe25d48b3c" />
 
-<img width="1852" height="877" alt="Screenshot 2026-09-15 212650" src="https://github.com/user-attachments/assets/fb0477a0-7341-47bf-b179-b99dc82e8ecc" />
 
 
-```
-*Firewall policy editor and security enforcement panel controlling domain blacklists, IP rules, and custom block pages.*
 
----
 
 ### 4. Centralized System & Audit Logs
 
 <img width="1852" height="877" alt="Screenshot 2026-09-15 212650" src="https://github.com/user-attachments/assets/39e45901-f99a-4d57-9170-a6141c20da71" />
 
-```
-*Centralized event log viewer with real-time log ingestion, severity filtering (INFO, WARN, ERROR, CRITICAL), and tamper-evident audit logs.*
 
----
 
 ## Core Features
 
